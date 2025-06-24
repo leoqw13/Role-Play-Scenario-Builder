@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role-Play Scenario Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        secondary: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                        },
+                        dark: {
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'custom': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: 0, transform: 'translateY(-10px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' },
+                        },
+                    },
+                    animation: {
+                        fadeIn: 'fadeIn 0.3s ease-out',
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        :root {
+            --background: #F9FAFB;
+            --card-bg: #FFFFFF;
+            --text: #1F2937;
+            --border: #E5E7EB;
+        }
+
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .drag-over {
+            background-color: #eff6ff;
+            border: 2px dashed #60a5fa;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+        }
+
+        .modal-content {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .modal-content.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        [class^="animate-"] {
+            opacity: 0;
+        }
+
+        @keyframes fadeInRight {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-right {
+            transform: translateX(-20px);
+            animation: fadeInRight 800ms ease-out forwards;
+        }
+
+        .animate-down {
+            transform: translateY(-20px);
+            animation: fadeInDown 800ms ease-out forwards;
+        }
+
+        .animate-left {
+            transform: translateX(20px);
+            animation: fadeInLeft 800ms ease-out forwards;
+        }
+
+        .max-custom {
+            max-width: 95rem;
+        }
+    </style>
+</head>
+
+<body
+    class="min-h-screen p-4 transition-colors duration-300 bg-gradient-to-br from-white to-gray-200 dark:bg-gradient-to-br dark:from-dark-900 dark:to-dark-800 dark:text-dark-100">
+    <div class="max-custom mx-auto">
+        <!-- Header -->
+        <header
+            class="flex justify-between items-center mb-12 py-8 px-6 bg-white dark:bg-gray-800 shadow-md rounded-2xl sticky top-0 z-40 animate-down">
+            <h1
+                class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-purple-700 dark:from-sky-400 dark:to-purple-500">
+                Role-Play Scenario <span class="bg-indigo-500 text-white py-1 px-3 rounded-xl">Builder</span>
+            </h1>
+            <div class="flex items-center gap-4">
+                <div class="relative tooltip-container">
+                    <button id="theme-toggle"
+                        class="p-2 rounded-full hover:bg-sky-300 dark:hover:bg-primary-700 text-dark-700 dark:text-dark-300 transition duration-200 flex items-center"
+                        aria-label="Toggle dark/light mode">
+                        <i class="fa-solid fa-sun text-xl"></i>
+                    </button>
+
+                </div>
+                <div class="relative tooltip-container">
+                    <button onclick="showHelp()"
+                        class="p-2 rounded-full hover:bg-sky-600 dark:hover:bg-primary-700 text-dark-700 dark:text-dark-300 transition duration-200 flex items-center"
+                        aria-label="Help">
+                        <i class="fa-solid fa-circle-info text-xl"></i> <span class="ml-2">Help & instructions</span>
+                    </button>
+
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Builder Panel -->
+            <div class="animate-right bg-white dark:bg-dark-800 rounded-2xl shadow-custom p-6 h-fit sticky top-20"
+                style="animation-delay: 300ms;">
+                <button onclick="showTips()"
+                    class="absolute top-4 right-6 text-gray-400 hover:text-blue-600 transition-colors z-40"
+                    aria-label="Help">
+                    <i class="fa-solid fa-circle-info text-xl"></i>
+                </button>
+                <form class="space-y-6 z-0" onsubmit="event.preventDefault()">
+                    <div class="relative">
+                        <label for="scenario-title"
+                            class="block text-sm font-bold text-dark-700 dark:text-dark-200 mb-2">Scenario
+                            Title*</label>
+                        <input id="scenario-title" required maxlength="60" minlength="5"
+                            class="outline-none w-full px-4 py-3 rounded-lg border border-dark-600 dark:bg-dark-700 dark:text-dark-100 focus:ring-2 focus:ring-primary-500 pr-12 transition-all"
+                            placeholder="e.g., Customer Service Role-Play">
+                        <div id="title-counter"
+                            class="absolute right-3 bottom-3 text-xs text-dark-400 dark:text-dark-500">0/60</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="department"
+                                class="block text-sm font-bold text-dark-700 dark:text-dark-200 mb-2">Department</label>
+                            <div class="flex gap-2">
+                                <select id="department"
+                                    class="duration-200 outline-none flex-1 px-4 py-3 rounded-lg border border-dark-600 dark:bg-dark-700 dark:text-dark-100 focus:ring-2 focus:ring-primary-500">
+                                    <option value="HR">HR</option>
+                                    <option value="Sales">Sales</option>
+                                    <option value="IT">IT</option>
+                                    <option value="Marketing">Marketing</option>
+                                </select>
+                                <input id="custom-department" placeholder="Specify"
+                                    class="w-32 px-3 py-2 rounded-lg border border-dark-600 dark:bg-dark-700 dark:text-dark-100 hidden transition-all">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="section-type"
+                                class="block text-sm font-bold text-dark-700 dark:text-dark-200 mb-2">Section
+                                Type</label>
+                            <select id="section-type"
+                                class="duration-200 outline-none w-full px-4 py-3 rounded-lg border border-dark-600 dark:bg-dark-700 dark:text-dark-100 focus:ring-2 focus:ring-primary-500">
+                                <option value="Dialogue">Dialogue</option>
+                                <option value="Objective">Objective</option>
+                                <option value="Instruction">Instruction</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <label for="section-content"
+                            class="block text-sm font-bold text-dark-700 dark:text-dark-200 mb-2">Content*</label>
+                        <textarea id="section-content" rows="4" required maxlength="500"
+                            class="outline-none w-full px-4 py-3 rounded-lg border border-dark-600 dark:bg-dark-700 dark:text-dark-100 focus:ring-2 focus:ring-primary-500 transition-all pr-12 min-h-[100px] max-h-[300px]"
+                            placeholder="Enter section content"></textarea>
+                        <div id="content-counter"
+                            class="absolute right-3 bottom-3 text-xs text-dark-400 dark:text-dark-500">0/500</div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-dark-700 dark:text-dark-200 mb-2">Quick
+                            Templates</label>
+                        <div class="grid grid-cols-3 gap-3 template-buttons">
+                            <button type="button" data-template="customer-interaction"
+                                class="p-3 bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800 transition-all flex flex-wrap justify-center items-center gap-2">
+                                <i class="fa-solid fa-user text-xl"></i>
+                                Customer
+                            </button>
+                            <button type="button" data-template="team-introduction"
+                                class="p-3 bg-green-50 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 transition-all flex flex-wrap justify-center items-center gap-2">
+                                <i class="fa-solid fa-users text-xl"></i>
+                                Team Intro
+                            </button>
+                            <button type="button" data-template="policy-review"
+                                class="p-3 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900 transition-all flex flex-wrap justify-center items-center gap-2">
+                                <i class="fa-solid fa-clipboard-check text-xl"></i>
+                                Policy
+                            </button>
+                        </div>
+                    </div>
+                    <!--Buttons section-->
+                    <div class="flex gap-3 grid grid-cols-6">
+                        <button id="add-section"
+                            class="col-span-4 flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-all">
+                            <i class="fa-solid fa-plus mr-2"></i> Add Section
+                        </button>
+                        <button id="cancel-edit-btn" type="button" onclick="cancelEdit()"
+                            class="col-span-2 hidden px-6 py-3 bg-dark-200 dark:bg-dark-600 text-dark-700 dark:text-dark-200 rounded-lg hover:bg-dark-300 dark:hover:bg-dark-500 transition-colors">
+                            <i class="fa-solid fa-ban mr-2"></i> Cancel
+                        </button>
+                        <button id="reset-scenario" type="button"
+                            class="col-span-2 px-6 py-3 border border-red-600 text-red-600 dark:border-red-500 dark:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900 transition-colors">
+                            <i class="fa-solid fa-trash-can mr-2"></i> Reset All
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="animate-left bg-white dark:bg-dark-800 rounded-2xl shadow-custom p-6"
+                ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)"
+                style="animation-delay: 600ms;">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-semibold text-dark-800 dark:text-dark-200">Preview</h2>
+                    <div class="flex items-center gap-3">
+                        <div id="department-badge"
+                            class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="preview-content" class="space-y-6 transition-all">
+                    <div class="text-center p-6 bg-dark-100 dark:bg-dark-700 rounded-lg">
+                        <p class="text-dark-500 dark:text-dark-400">Your scenario will appear here</p>
+                    </div>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <button onclick="exportPDF()"
+                        class="mt-4 flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors">
+                        <i class="fa-solid fa-file-export"></i>
+                        Export PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"
+        class="fixed bottom-4 right-4 p-4 bg-dark-800 dark:bg-dark-600 text-white dark:text-dark-200 rounded-lg shadow-xl transform translate-y-20 transition-transform duration-300">
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 max-w-2xl modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-dark-800 dark:text-dark-200">Role-Play Scenario Builder Help</h3>
+                <button onclick="closeModal('help-modal')"
+                    class="text-dark-400 dark:text-dark-300 hover:text-dark-600 dark:hover:text-dark-400">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-dark-600 dark:text-dark-300">
+                <p class="font-semibold">Welcome to the Role-Play Scenario Builder!</p>
+                <p>Create engaging onboarding scenarios with these features:</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Scenario Creation</strong>: Use
+                        quick templates for instant setups like customer interactions or policy reviews.</li>
+                    <li><strong>Preview</strong>: View your scenario in real-time, reorder sections via drag-and-drop,
+                        edit or delete sections, and see the department context via a badge.</li>
+                    <li><strong>PDF Export</strong>: Export your scenario as a formatted PDF for sharing or printing,
+                        ensuring at least one section is added.</li>
+                </ul>
+                <p class="text-sm text-dark-400 dark:text-dark-500">Tip: Use the theme toggle to switch between light
+                    and dark modes for better visibility.</p>
+            </div>
+        </div>
+    </div>
+    <!-- Scenario Creation Tips Modal -->
+    <div id="help-tips"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 max-w-2xl modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-dark-800 dark:text-dark-200">Help Guide</h3>
+                <button onclick="closeModal('help-tips')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-dark-600 dark:text-dark-300">
+                <p>📌 Create engaging onboarding scenarios with these steps:</p>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li>Enter a title (min. 5 characters)</li>
+                    <li>Select department context</li>
+                    <li>Choose section type and content</li>
+                    <li>Use templates for quick creation</li>
+                    <li>Drag sections to reorder</li>
+                    <li>Export as PDF when ready</li>
+                </ol>
+                <p class="text-sm text-gray-400">Tip: Double-check content length requirements before adding sections.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Section Modal -->
+    <div id="delete-section-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 max-w-md modal-content">
+            <div class="text-center">
+                <div
+                    class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/50 mb-4">
+                    <i class="fa-solid fa-trash-can text-red-600 dark:text-red-400 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-dark-900 dark:text-dark-200 mb-2">Delete Section</h3>
+                <p class="text-sm text-dark-500 dark:text-dark-400 mb-6">Are you sure you want to delete this section?
+                    This action cannot be undone.</p>
+                <div class="flex justify-center gap-3">
+                    <button onclick="closeModal('delete-section-modal')"
+                        class="px-4 py-2 bg-dark-200 dark:bg-dark-600 text-dark-800 dark:text-dark-200 rounded-lg hover:bg-dark-300 dark:hover:bg-dark-500 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirm-delete-section"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset All Modal -->
+    <div id="reset-all-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 max-w-md modal-content">
+            <div class="text-center">
+                <div
+                    class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-danger-100 dark:bg-danger-900/50 mb-4">
+                    <i class="fa-solid fa-exclamation-triangle text-danger-600 dark:text-danger-400 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-dark-900 dark:text-dark-200 mb-2">Reset All Progress</h3>
+                <p class="text-sm text-dark-500 dark:text-dark-400 mb-6">Are you sure you want to reset all progress?
+                    This will delete all sections and clear the title and department. This action cannot be undone.</p>
+                <div class="flex justify-center gap-3">
+                    <button onclick="closeModal('reset-all-modal')"
+                        class="px-4 py-2 bg-dark-200 dark:bg-dark-600 text-dark-800 dark:text-dark-200 rounded-lg hover:bg-dark-300 dark:hover:bg-dark-500 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirm-reset-all"
+                        class="px-4 py-2 bg-danger-600 text-white rounded-lg hover:bg-danger-700 dark:hover:bg-danger-600 transition-colors">
+                        Reset All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        let scenario = {
+            title: '',
+            department: '',
+            sections: []
+        };
+
+        let sectionToDelete = null;
+        let editingIndex = null;
+        let originalSection = null;
+
+        const elements = {
+            titleInput: document.getElementById('scenario-title'),
+            departmentSelect: document.getElementById('department'),
+            sectionTypeSelect: document.getElementById('section-type'),
+            sectionContentInput: document.getElementById('section-content'),
+            addSectionBtn: document.getElementById('add-section'),
+            resetBtn: document.getElementById('reset-scenario'),
+            previewContent: document.getElementById('preview-content'),
+            departmentBadge: document.getElementById('department-badge'),
+            confirmDeleteBtn: document.getElementById('confirm-delete-section'),
+            confirmResetBtn: document.getElementById('confirm-reset-all')
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupCharacterCounters();
+            setupTemplateButtons();
+            setupFormValidation();
+            setupModalButtons();
+            setupThemeToggle();
+            updatePreview();
+        });
+
+        function setupCharacterCounters() {
+            elements.titleInput.addEventListener('input', updateTitleCounter);
+            elements.sectionContentInput.addEventListener('input', updateContentCounter);
+        }
+
+        function updateTitleCounter() {
+            document.getElementById('title-counter').textContent =
+                `${elements.titleInput.value.length}/60`;
+        }
+
+        function updateContentCounter() {
+            document.getElementById('content-counter').textContent =
+                `${elements.sectionContentInput.value.length}/500`;
+        }
+
+        function setupTemplateButtons() {
+            const templates = {
+                'customer-interaction': {
+                    type: 'Dialogue',
+                    content: 'Employee: Welcome to our service team!\nCustomer: Thank you, I need help with my recent purchase.'
+                },
+                'team-introduction': {
+                    type: 'Objective',
+                    content: 'Introduce team members and explain their roles in supporting customer success.'
+                },
+                'policy-review': {
+                    type: 'Instruction',
+                    content: 'Review return policy and escalation procedures for common customer scenarios.'
+                }
+            };
+
+            document.querySelectorAll('.template-buttons button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const template = templates[btn.dataset.template];
+                    elements.sectionTypeSelect.value = template.type;
+                    elements.sectionContentInput.value = template.content;
+                    updateContentCounter();
+                    showToast('Template loaded', 'success');
+                });
+            });
+        }
+
+        function setupFormValidation() {
+            elements.addSectionBtn.addEventListener('click', () => {
+                if (!validateForm()) return;
+
+                if (editingIndex !== null) {
+                    scenario.sections[editingIndex] = {
+                        type: elements.sectionTypeSelect.value,
+                        content: elements.sectionContentInput.value.trim()
+                    };
+                    showToast('Section updated successfully', 'success');
+                    editingIndex = null;
+                    originalSection = null;
+                    elements.addSectionBtn.innerHTML = '<i class="fa-solid fa-plus mr-2"></i> Add Section';
+                    document.getElementById('cancel-edit-btn').classList.add('hidden');
+                    elements.addSectionBtn.classList.remove('col-span-2');
+                    elements.addSectionBtn.classList.add('col-span-4');
+                } else {
+                    scenario.sections.push({
+                        type: elements.sectionTypeSelect.value,
+                        content: elements.sectionContentInput.value.trim()
+                    });
+                    showToast('Section added successfully', 'success');
+                }
+
+                updatePreview();
+                elements.sectionContentInput.value = '';
+                updateContentCounter();
+            });
+
+            elements.resetBtn.addEventListener('click', () => {
+                openModal('reset-all-modal');
+            });
+        }
+
+        function setupModalButtons() {
+            elements.confirmDeleteBtn.addEventListener('click', () => {
+                if (sectionToDelete !== null) {
+                    scenario.sections.splice(sectionToDelete, 1);
+                    updatePreview();
+                    showToast('Section deleted', 'success');
+                    sectionToDelete = null;
+                }
+                closeModal('delete-section-modal');
+            });
+
+            elements.confirmResetBtn.addEventListener('click', () => {
+                scenario = { title: '', department: '', sections: [] };
+                elements.titleInput.value = '';
+                elements.departmentSelect.value = 'HR';
+                elements.sectionTypeSelect.value = 'Dialogue';
+                elements.sectionContentInput.value = '';
+                updateTitleCounter();
+                updateContentCounter();
+                updatePreview();
+                showToast('Scenario reset', 'success');
+                closeModal('reset-all-modal');
+            });
+        }
+
+        function setupThemeToggle() {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+            if (savedTheme === 'dark') {
+                html.classList.add('dark');
+                themeToggleBtn.innerHTML = '<i class="fa-solid fa-sun text-xl"></i><span class="ml-2">Toggle dark/light mode</span>';
+            } else {
+                html.classList.remove('dark');
+                themeToggleBtn.innerHTML = '<i class="fa-solid fa-moon text-xl"></i><span class="ml-2">Toggle dark/light mode</span>';
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                const isDark = html.classList.toggle('dark');
+                themeToggleBtn.innerHTML = isDark
+                    ? '<i class="fa-solid fa-sun text-xl"></i><span class="ml-2">Toggle dark/light mode</span>'
+                    : '<i class="fa-solid fa-moon text-xl"></i><span class="ml-2">Toggle dark/light mode</span>';
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                showToast(`Switched to ${isDark ? 'dark' : 'light'} mode`, 'info');
+            });
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            if (elements.titleInput.value.trim().length < 5) {
+                showToast('Title must be at least 5 characters', 'error');
+                isValid = false;
+            }
+
+            if (elements.sectionContentInput.value.trim().length < 10) {
+                showToast('Content must be at least 10 characters', 'error');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function updatePreview() {
+            scenario.title = elements.titleInput.value.trim();
+            scenario.department = elements.departmentSelect.value;
+
+            elements.departmentBadge.textContent = scenario.department || 'No department selected';
+            elements.departmentBadge.className = scenario.department
+                ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full text-sm'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full text-sm';
+
+
+            elements.previewContent.innerHTML = scenario.sections.length ? '' :
+                '<div class="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Your scenario will appear here</p></div>';
+            scenario.sections.forEach((section, index) => {
+                const sectionEl = document.createElement('div');
+                sectionEl.className = `section-card bg-white dark:bg-dark-800 p-6 rounded-lg shadow-sm border-l-4 fade-in cursor-move ${section.type === 'Dialogue' ? 'border-primary-400 dark:border-primary-600' :
+                    section.type === 'Objective' ? 'border-green-400 dark:border-green-600' : 'border-secondary-400 dark:border-secondary-600'
+                    }`;
+                sectionEl.draggable = true;
+                sectionEl.addEventListener('dragstart', (e) => handleDragStart(e, index));
+
+                const iconClass = section.type === 'Dialogue' ? 'fa-comments' :
+                    section.type === 'Objective' ? 'fa-bullseye' : 'fa-list-check';
+
+                sectionEl.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid ${iconClass} text-dark-400 dark:text-dark-300"></i>
+              <span class="text-sm font-medium text-dark-700 dark:text-dark-200">${section.type}</span>
+              <span class="text-xs text-dark-400 dark:text-dark-500">• ${index + 1}</span>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="editSection(${index})" class="text-dark-400 dark:text-dark-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button onclick="showDeleteModal(${index})" class="text-dark-400 dark:text-dark-300 hover:text-danger-600 dark:hover:text-danger-400 transition-colors">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+          <p class="text-dark-600 dark:text-dark-300 whitespace-pre-line">${section.content}</p>
+        `;
+
+                elements.previewContent.appendChild(sectionEl);
+            });
+        }
+
+        // Drag & Drop
+        let dragStartIndex = null;
+
+        function handleDragStart(e, index) {
+            dragStartIndex = index;
+            e.dataTransfer.effectAllowed = "move";
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+
+            const dragEndIndex = Array.from(elements.previewContent.children)
+                .findIndex(child => {
+                    const rect = child.getBoundingClientRect();
+                    return e.clientY < rect.top + (rect.height / 2);
+                });
+
+            if (dragStartIndex !== null && dragEndIndex !== -1 && dragStartIndex !== dragEndIndex) {
+                const [movedItem] = scenario.sections.splice(dragStartIndex, 1);
+                const insertIndex = dragEndIndex > dragStartIndex ? dragEndIndex - 1 : dragEndIndex;
+                scenario.sections.splice(insertIndex, 0, movedItem);
+                updatePreview();
+                showToast('Section reordered', 'success');
+            }
+            dragStartIndex = null;
+        }
+
+        // Section Actions
+        function editSection(index) {
+            const section = scenario.sections[index];
+            elements.sectionTypeSelect.value = section.type;
+            elements.sectionContentInput.value = section.content;
+            updateContentCounter();
+
+            editingIndex = index;
+            originalSection = { ...section };
+
+            elements.addSectionBtn.innerHTML = '<i class="fa-solid fa-save mr-2"></i> Save Changes';
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            elements.addSectionBtn.classList.remove('col-span-4');
+            elements.addSectionBtn.classList.add('col-span-2');
+
+            showToast('Editing section', 'info');
+        }
+
+        function cancelEdit() {
+            if (editingIndex !== null && originalSection !== null) {
+                scenario.sections[editingIndex] = originalSection;
+                elements.sectionContentInput.value = '';
+                elements.sectionTypeSelect.value = 'Dialogue';
+                updateContentCounter();
+                editingIndex = null;
+                originalSection = null;
+                elements.addSectionBtn.innerHTML = '<i class="fa-solid fa-plus mr-2"></i> Add Section';
+                document.getElementById('cancel-edit-btn').classList.add('hidden');
+                elements.addSectionBtn.classList.remove('col-span-2');
+                elements.addSectionBtn.classList.add('col-span-4');
+                updatePreview();
+                showToast('Edit cancelled', 'info');
+            }
+        }
+
+        function showDeleteModal(index) {
+            sectionToDelete = index;
+            openModal('delete-section-modal');
+        }
+
+        // Modal Helpers
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('active');
+                modal.querySelector('.modal-content').classList.add('active');
+            }, 10);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active');
+            modal.querySelector('.modal-content').classList.remove('active');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // UI Helpers
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            let typeClasses = '';
+
+            switch (type) {
+                case 'success':
+                    typeClasses = 'bg-primary-600';
+                    break;
+                case 'error':
+                    typeClasses = 'bg-danger-600';
+                    break;
+                default:
+                    typeClasses = 'bg-dark-800 dark:bg-dark-600';
+            }
+
+            toast.className = `fixed bottom-4 right-4 p-4 ${typeClasses} text-white dark:text-dark-200 rounded-lg shadow-xl transform transition-transform duration-300 animate-fadeIn`;
+            toast.textContent = message;
+            toast.classList.remove('translate-y-20');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20');
+                setTimeout(() => {
+                    toast.className = `fixed bottom-4 right-4 p-4 ${typeClasses} text-white dark:text-dark-200 rounded-lg shadow-xl transform translate-y-20 transition-transform duration-300`;
+                }, 300);
+            }, 3000);
+        }
+
+        function exportPDF() {
+            if (scenario.sections.length === 0) {
+                showToast('Add at least one section before exporting', 'error');
+                return;
+            }
+
+            const pdfContent = document.createElement('div');
+            pdfContent.className = 'bg-white p-6';
+
+            const header = document.createElement('div');
+            header.className = 'flex justify-between items-center mb-6';
+            header.innerHTML = `
+        <h1 class="text-3xl font-bold text-dark-800">${scenario.title || 'Untitled Scenario'}</h1>
+        <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">${scenario.department || 'No department selected'}</div>
+    `;
+            pdfContent.appendChild(header);
+
+            const separator = document.createElement('hr');
+            separator.className = 'border-t border-dark-300 mb-6 ';
+            pdfContent.appendChild(separator);
+
+            const sectionsContainer = document.createElement('div');
+            sectionsContainer.className = 'space-y-6';
+            scenario.sections.forEach((section, index) => {
+                const sectionEl = document.createElement('div');
+                sectionEl.className = `section-card bg-white p-6 rounded-lg shadow-sm border-l-4 ${section.type === 'Dialogue' ? 'border-primary-400' :
+                    section.type === 'Objective' ? 'border-green-400' : 'border-secondary-400'
+                    }`;
+
+                const iconClass = section.type === 'Dialogue' ? 'fa-comments' :
+                    section.type === 'Objective' ? 'fa-bullseye' : 'fa-list-check';
+
+                sectionEl.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid ${iconClass} text-dark-400"></i>
+                    <span class="text-sm font-medium text-dark-700">${section.type}</span>
+                    <span class="text-xs text-dark-400">• ${index + 1}</span>
+                </div>
+            </div>
+            <p class="text-dark-600 whitespace-pre-line">${section.content}</p>
+        `;
+                sectionsContainer.appendChild(sectionEl);
+            });
+            pdfContent.appendChild(sectionsContainer);
+
+            html2pdf()
+                .set({
+                    margin: [15, 15],
+                    filename: `${scenario.title || 'Untitled Scenario'}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                })
+                .from(pdfContent)
+                .save();
+
+            showToast('PDF exported successfully', 'success');
+        }
+
+        function showHelp() {
+            openModal('help-modal');
+        }
+
+        function showTips() {
+            openModal('help-tips');
+        }
+    </script>
+</body>
+
+</html>
